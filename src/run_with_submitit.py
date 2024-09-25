@@ -23,6 +23,7 @@ from pathlib import Path
 import main_dino
 import submitit
 
+# to load the lastest checkpoint
 import torch
 
 
@@ -31,12 +32,8 @@ def parse_args():
     parser.add_argument("--ngpus", default=8, type=int, help="Number of gpus to request on each node")
     parser.add_argument("--nodes", default=2, type=int, help="Number of nodes to request")
     parser.add_argument("--timeout", default=716, type=int, help="Duration of the job in minutes")
-
-    #parser.add_argument("--timeout_min", default=None, type=int, help="Job duration in minutes")
     parser.add_argument("--partition", default="gpu16,gpu20,gpu22", type=str, help="Partition where to submit")
-
-    parser.add_argument('--comment', default=None, type=str,
-                        help='Comment to pass to scheduler, e.g. priority message')
+    parser.add_argument('--comment', default=None, type=str, help='Comment to pass to scheduler, e.g. priority message')
     return parser.parse_args()
 
 
@@ -45,7 +42,7 @@ def get_shared_folder(shared_folder="/checkpoint/") -> Path:
     if Path(shared_folder).is_dir():
         #p = Path(f"/checkpoint/{user}/experiments")
         p = Path(shared_folder) / Path(f"{user}/experiments")
-        p.mkdir(exist_ok=True)
+        p.mkdir(parents=True, exist_ok=True)
         return p
     raise RuntimeError("No shared folder available")
 
@@ -137,7 +134,6 @@ def main():
 
     executor.update_parameters(
         mem_gb= 110 * num_gpus_per_node,
-        #mem_gb= 42 * num_gpus_per_node,
         gpus_per_node=num_gpus_per_node,
         tasks_per_node=num_gpus_per_node,  # one task per GPU
         #cpus_per_task=4,
